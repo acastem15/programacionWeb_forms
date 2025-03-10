@@ -6,14 +6,21 @@ import Form from 'react-bootstrap/Form';
 
 function App() {
   const [formValues, setFormValues] = useState({email:"", password:"", favClass:"1"});
-  const validationStates = {emailState:true, passwordState:true}
+  const [validationStates, setIsValid] = useState({emailState:true, passwordState:true});
   const handleEmailChange = ((e) => {
     setFormValues({...formValues, email: e.target.value})
   });
  
   const handlePasswordChange = ((e) => {
     setFormValues({...formValues, password: e.target.value})
-    !validationStates.passwordState && <Form.Text className="text-muted">Your password should be have numbers and letters and should be at least 9 char long</Form.Text>
+
+    if (formValues.password.length <9 || (!formValues.password.match(/[\w]+/) ||!formValues.password.match(/[\d]+/))){
+        setIsValid({...validationStates, passwordState: false});
+    }else{
+      setIsValid({...validationStates, passwordState: true});
+    }
+
+    console.log(validationStates.passwordState);
 
   });
  
@@ -22,15 +29,17 @@ function App() {
   });
   const clickSubmit = (() => {
     //Call fetch
+    console.log("Clicked")
 
     //Validate email 
-    if (formValues.email.match(/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)){
-      validationStates.emailState=true
+    if (!formValues.email.match(/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)){
+      setIsValid({...validationStates, emailState: false});
+      console.log("si estoy")
     }else{
-      validationStates.emailState=false
+      setIsValid({...validationStates, emailState: true});
     }
-    !validationStates.emailState && <Form.Text className="text-muted">Your email should follow an established format </Form.Text>
-    alert(JSON.stringify(formValues))
+    console.log("hhheyy",validationStates.emailState)
+    //alert(JSON.stringify(formValues))
   })
 
   return (
@@ -40,13 +49,17 @@ function App() {
       <Form>
       <Form.Group className="mb-6" controlId="formBasicEmail">
         <Form.Label>Email address</Form.Label>
-        <Form.Control type="email" placeholder="Enter email" onChange={handleEmailChange} value={formValues.email}/>
-        { !validationStates.emailState && <Form.Text className="text-muted">We'll never share your email with anyone else.</Form.Text>}
+        <Form.Control type="email" placeholder="Enter email" onChange={handleEmailChange} value={formValues.email} isInvalid={!validationStates.emailState}/>
+        { !validationStates.emailState && <Form.Text className="text-muted">Your email should follow an established format.</Form.Text>}
       </Form.Group>
  
       <Form.Group className="mb-3" controlId="formBasicPassword">
         <Form.Label>Password</Form.Label>
-        <Form.Control type="password" placeholder="Password" onChange={handlePasswordChange} value={formValues.password} />
+        <Form.Control type="password" placeholder="Password" onChange={handlePasswordChange} value={formValues.password}  isInvalid={!validationStates.passwordState} />
+
+        { !validationStates.passwordState && <Form.Text className="text-muted">Your password should have numbers and letters and should be at least 9 char long.</Form.Text>}
+
+        
       </Form.Group>
       <Form.Group className="mb-3" controlId="formBasicCheckbox">
         <Form.Label>Favorite Class</Form.Label>
